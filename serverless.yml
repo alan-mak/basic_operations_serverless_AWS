@@ -1,0 +1,67 @@
+service: serverless-dynamo-basic-operation
+frameworkVersion: '2'
+
+custom:
+  settings:
+    tableName: personTable
+    region: us-east-1
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  profile: alanmak95
+  lambdaHashingVersion: 20201221
+# you can define service wide environment variables here
+  environment: ${self:custom.settings}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:*
+          Resource:
+            - "arn:aws:dynamodb:${self:custom.settings.region}:074500630973:table/${self:custom.settings.tableName}"
+
+functions:
+  getItem:
+    handler: handler.getItem
+    events:
+      - http:
+          path: item/{itemID}
+          method: get
+  saveItem:
+    handler: handler.saveItem
+    events:
+      - http:
+          path: item
+          method: post
+          cors: true
+  updateItem:
+    handler: handler.updateItem
+    events:
+      - http:
+          path: item/{itemID}
+          method: put
+  deleteItem:
+    handler: handler.deleteItem
+    events:
+      - http:
+          path: item/{itemID}
+          method: delete
+
+# you can add CloudFormation resource templates here
+resources:
+  Resources:
+    NewResource:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.settings.tableName}
+        AttributeDefinitions:
+          - AttributeName: ID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ID
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
