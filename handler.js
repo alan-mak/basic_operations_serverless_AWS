@@ -37,15 +37,14 @@ module.exports.deleteItem = async (event) => {
   return createResponse(200, "Item was deleted")
 };
 
-module.exports.updateItem = (event, context, callback) => {
+module.exports.updateItem = async (event) => {
   const itemId = event.pathParameters.itemID
 
   const body = JSON.parse(event.body)
   const paramName = body.paramName
   const paramValue = body.paramValue
 
-  databaseManager.updateItem(itemId, paramName, paramValue)
-  .then(response => {
-    callback(null, createResponse(200, response))
-  })
+  const data = await databaseManager.updateItem(itemId, paramName, paramValue)
+
+  return createResponse(200, data)
 };

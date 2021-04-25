@@ -41,22 +41,19 @@ module.exports.deleteItem = itemID => {
   return dynamo.delete(params).promise()
 }
 
-module.exports.updateItem = (itemID, paramsName, paramsValue) => {
+module.exports.updateItem = async (itemID, paramsName, paramsValue) => {
+  
   const params = {
     TableName: TABLE_NAME,
     Key: {
-      itemID
+      ID: itemID
     },
-    ConditionExpression: 'attribute_exits(itemID)',
-    UpdateExpression: 'set ' + paramsName + ' =:v',
+    UpdateExpression: `set ${paramsName} = :updateValue`,
     ExpressionAttributeValues: {
-      ':v': paramsValue
+      ':updateValue': paramsValue
     },
-    ReturnValues: 'ALL_NEW'
+    ReturnValues: 'ALL_OLD'
   }
-
-  return dynamo.update(params).promise()
-  .then(response => {
-    return response.Attributes;
-  })
+  const data = await dynamo.update(params).promise()
+  return data.Attributes;
 }
