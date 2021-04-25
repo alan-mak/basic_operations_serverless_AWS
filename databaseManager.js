@@ -15,24 +15,25 @@ module.exports.saveItem = async (item) => {
   return item;
 }
 
-module.exports.getItem = itemID => {
+module.exports.getItem = async (itemID) => {
   const params = {
     Key: {
-      itemId: itemID
+      ID: itemID
     },
     TableName: TABLE_NAME
   };
 
-  return dynamo.get(params).promise()
-  .then( result => {
-    return result.item
-  })
+  const data = await dynamo.get(params).promise()
+  if(Object.entries(data).length < 0) {
+    return null;
+  }
+  return data.Item;
 }
 
 module.exports.deleteItem = itemID => {
   const params = {
     Key: {
-      itemId: itemID
+      ID: itemID
     },
     TableName: TABLE_NAME
   }

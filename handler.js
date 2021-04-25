@@ -16,32 +16,29 @@ const createResponse = (statusCode, message) => {
 module.exports.saveItem = async (event) => {
   const item = JSON.parse(event.body)
   item.ID = randomID();
-  console.info(item)
   const newPost = await databaseManager.saveItem(item)
-  console.info("Handler 21", newPost)  
   return createResponse(200, newPost)
 };
 
-module.exports.getItem = (event, context, callback) => {
-  const itemId = event.pathParamaters.itemID
-
-  databaseManager.getItem(itemId)
-  .then(response => {
-    callback(null, createResponse(200, response))
-  })
+module.exports.getItem = async (event) => {
+  const itemId = event.pathParameters.itemID
+  const getInfo = await databaseManager.getItem(itemId)
+  if (!getInfo) {
+    return createResponse(404, "Not Found!")
+  }
+  return createResponse(200, getInfo)
 };
 
-module.exports.deleteItem = (event, context, callback) => {
-  const itemId = event.pathParamaters.itemID
+module.exports.deleteItem = async (event) => {
+  const itemId = event.pathParameters.itemID
 
-  databaseManager.deleteItem(itemId)
-  .then(response => {
-    callback(null, createResponse(200, "Item was deleted"))
-  })
+  const res = await databaseManager.deleteItem(itemId)
+  
+  return createResponse(200, "Item was deleted")
 };
 
 module.exports.updateItem = (event, context, callback) => {
-  const itemId = event.pathParamaters.itemID
+  const itemId = event.pathParameters.itemID
 
   const body = JSON.parse(event.body)
   const paramName = body.paramName
